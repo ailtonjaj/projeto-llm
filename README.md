@@ -50,9 +50,9 @@ O projeto tem apelo social ao **orientar pessoas em transição de carreira ou c
 
 - **Linguagem:** Python 3.11+
 - **Agentes:** LangChain + LangGraph
-- **RAG / Indexação:** FAISS ou Chroma (open-source)
-- **LLM:** Llama 3.x (via Ollama) — local
-- **Embeddings:** HuggingFace (ex.: `bge-m3` ou `gte/bge-small`)
+- **RAG / Indexação:** FAISS (open-source)
+- **LLM:** Gemini 2.5 Flash - API KEY
+- **Embeddings:** HuggingFace `bge-small`
 - **UI:** Streamlit
 - **MCP:** MCP-docstore local
 - **Código & Versionamento:** GitHub (MIT License)
