@@ -22,22 +22,3 @@ def run_eval(graph):
     results = evaluate(dataset, metrics=[faithfulness, answer_relevancy,
                                          context_precision, context_recall])
     print(results)
-```
-
----
-
-## 7. `requirements.txt`
-```
-langchain>=0.3
-langgraph>=0.2
-langchain-ollama
-langchain-huggingface
-langchain-community
-faiss-cpu
-streamlit
-kagglehub
-pandas
-mcp
-ragas
-datasets
-sentence-transformers

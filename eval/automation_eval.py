@@ -62,7 +62,6 @@ def run_automation_eval():
             gap = state.get("skill_gap", {}).get("gap", [])
             trilha = state.get("learning_path", {}).get("trilha", [])
 
-            # Checa se gap contém skills esperadas (case-insensitive)
             gap_lower = " ".join(gap).lower()
             gap_hits = sum(
                 1 for s in task
