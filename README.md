@@ -150,6 +150,31 @@ docker compose exec career-guide python eval/qa_eval.py
 | Answer Relevancy  | Relevância da resposta para a pergunta             |
 | Context Precision | Precisão dos chunks recuperados                    |
 | Context Recall    | Cobertura dos chunks relevantes                    |
+| Latência          | Tempo médio de resposta por pergunta (segundos)    |
+
+### Perguntas rotuladas (RAG)
+
+| #   | Pergunta                                                  | Ground Truth                                                                                     |
+| --- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 1   | Quais skills são exigidas para Data Scientist?            | Python, machine learning, SQL e estatística são as skills mais comuns para Data Scientist.       |
+| 2   | O que um Backend Developer precisa saber?                 | Backend developers precisam de Python ou Java, APIs REST, bancos de dados e Docker.              |
+| 3   | Quais são os requisitos para Product Manager?             | Product managers precisam de habilidades em Agile, roadmap, comunicação e análise de dados.      |
+| 4   | O que é exigido para DevOps Engineer?                     | DevOps engineers precisam de Kubernetes, CI/CD, Terraform, Linux e cloud computing.              |
+| 5   | Quais skills um UX Designer precisa ter?                  | UX Designers precisam de Figma, pesquisa com usuários, prototipação e design thinking.           |
+| 6   | O que um Frontend Developer precisa saber?                | Frontend developers precisam de JavaScript, React ou Vue, HTML, CSS e responsividade.            |
+| 7   | Quais são os requisitos para Machine Learning Engineer?   | ML Engineers precisam de Python, TensorFlow ou PyTorch, matemática e cloud computing.            |
+| 8   | O que um Data Engineer precisa dominar?                   | Data Engineers precisam de SQL, Python, pipelines de dados, Spark e ferramentas de cloud.        |
+| 9   | Quais habilidades são necessárias para Cloud Architect?   | Cloud Architects precisam de AWS ou Azure ou GCP, redes, segurança e infraestrutura como código. |
+| 10  | O que um Cybersecurity Analyst precisa saber?             | Analistas de segurança precisam de redes, criptografia, análise de vulnerabilidades e SIEM.      |
+| 11  | Quais skills são comuns em vagas de Full Stack Developer? | Full Stack Developers precisam de JavaScript, Node.js, React, bancos de dados e APIs REST.       |
+| 12  | O que um Mobile Developer precisa dominar?                | Mobile developers precisam de Swift ou Kotlin, React Native ou Flutter e publicação em lojas.    |
+| 13  | Quais são os requisitos para Business Analyst?            | Business Analysts precisam de SQL, Excel, requisitos de negócio, Power BI e comunicação.         |
+| 14  | O que um Scrum Master precisa saber?                      | Scrum Masters precisam de metodologias ágeis, Scrum, facilitação e ferramentas como Jira.        |
+| 15  | Quais habilidades são exigidas para Data Analyst?         | Data Analysts precisam de SQL, Excel, Python ou R, visualização de dados e estatística básica.   |
+
+### Resultados (RAGAS)
+
+![Resultados RAGAS](img/ragas.jpeg)
 
 ### Automação
 
@@ -166,6 +191,20 @@ docker compose exec career-guide python eval/automation_eval.py
 | Taxa de sucesso | % de trilhas geradas com gap e fases corretas    |
 | Gap precision   | % de skills esperadas identificadas corretamente |
 | Tempo médio     | Segundos por tarefa de automação                 |
+
+### Tarefas de automação avaliadas
+
+| #   | Cargo alvo        | Skills do usuário | Gap esperado                      | Fases mínimas |
+| --- | ----------------- | ----------------- | --------------------------------- | ------------- |
+| 1   | Data Scientist    | Python, Excel     | Machine Learning, SQL, Statistics | 2             |
+| 2   | Backend Developer | HTML, CSS         | Python, API, Docker               | 2             |
+| 3   | Product Manager   | Excel, PowerPoint | Agile, Roadmap                    | 1             |
+| 4   | DevOps Engineer   | Linux, Python     | Kubernetes, CI/CD, Terraform      | 2             |
+| 5   | UX Designer       | Photoshop         | Figma, User Research              | 1             |
+
+### Resultados (Automação)
+
+![Resultados RAGAS](img/automation.jpeg)
 
 ### MCP
 

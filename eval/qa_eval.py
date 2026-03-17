@@ -10,7 +10,9 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.rate_limiters import InMemoryRateLimiter
+from ragas.dataset_schema import SingleTurnSample
 from src.graph.graph import build_graph
+import pandas as pd
 
 TEST_QUESTIONS = [
     {"question": "Quais skills são exigidas para Data Scientist?",
@@ -46,24 +48,38 @@ TEST_QUESTIONS = [
 ]
 
 def run_eval():
-    rate_limiter = InMemoryRateLimiter(requests_per_second=0.05)
+    rate_limiter = InMemoryRateLimiter(requests_per_second=0.3)
 
     ragas_llm = LangchainLLMWrapper(ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
         temperature=0,
         rate_limiter=rate_limiter
     ))
-
     ragas_embeddings = LangchainEmbeddingsWrapper(
         HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
     )
 
+    metrics = [
+        Faithfulness(llm=ragas_llm),
+        AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings),
+        ContextPrecision(llm=ragas_llm),
+        ContextRecall(llm=ragas_llm),
+    ]
+
+    run_config = RunConfig(
+        max_retries=5,
+        max_wait=120,
+        timeout=300
+    )
+
     graph = build_graph()
-    samples = []
+    all_results = []
+    latencias = []
 
     for item in TEST_QUESTIONS:
-        print(f"Avaliando: {item['question'][:50]}...")
+        print(f"\nAvaliando: {item['question'][:50]}...")
         start = time.time()
+
         try:
             result = graph.invoke({
                 "query": item["question"],
@@ -72,34 +88,48 @@ def run_eval():
                 "target_role": "",
             })
             elapsed = time.time() - start
+            latencias.append(elapsed)
+            print(f"  RAG OK ({elapsed:.1f}s) — avaliando métricas...")
 
-            from ragas.dataset_schema import SingleTurnSample
-            samples.append(SingleTurnSample(
+            sample = SingleTurnSample(
                 user_input=item["question"],
                 response=result.get("answer", ""),
                 retrieved_contexts=[d.page_content for d in result.get("retrieved_docs", [])],
                 reference=item["ground_truth"],
-            ))
-            print(f"  OK ({elapsed:.1f}s)")
+            )
+
+            dataset = EvaluationDataset(samples=[sample])
+            time.sleep(3)
+
+            row_result = evaluate(
+                dataset=dataset,
+                metrics=metrics,
+                run_config=run_config
+            )
+
+            row_df = row_result.to_pandas()
+            row_df["question"] = item["question"]
+            all_results.append(row_df)
+            print(f"  Métricas: {row_result}")
+
         except Exception as e:
             print(f"  ERRO: {e}")
+            latencias.append(time.time() - start)
 
-    dataset = EvaluationDataset(samples=samples)
+    if all_results:
+        final_df = pd.concat(all_results, ignore_index=True)
+        final_df.to_csv("eval/ragas_results.csv", index=False)
 
-    results = evaluate(
-        dataset=dataset,
-        metrics=[
-            Faithfulness(llm=ragas_llm),
-            AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings),
-            ContextPrecision(llm=ragas_llm),
-            ContextRecall(llm=ragas_llm),
-        ],
-        run_config=RunConfig(max_retries=3, max_wait=60)
-    )
-
-    print("\n=== Resultados RAGAS ===")
-    print(results)
-    return results
+        print("\n=== Resultados RAGAS ===")
+        numeric_cols = ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]
+        existing_cols = [c for c in numeric_cols if c in final_df.columns]
+        print(final_df[existing_cols].describe())
+        print(f"\nMédias finais:")
+        print(final_df[existing_cols].mean())
+        print(f"\nLatência média: {sum(latencias)/len(latencias):.1f}s")
+        print(f"Resultados salvos em eval/ragas_results.csv")
+    else:
+        print("Nenhum resultado calculado.")
 
 if __name__ == "__main__":
     run_eval()
