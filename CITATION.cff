@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "Se você usar este projeto, por favor cite conforme abaixo."
+type: software
+title: "JobPath: Agente de Trilha de Carreira baseado em Vagas de Emprego"
+version: 1.0.0
+date-released: 2025-03-16
+license: MIT
+repository-code: https://github.com/ailtonjaj/projeto-llm
+abstract: >
+  PoC de sistema agêntico open source que indexa vagas públicas do LinkedIn
+  e gera trilhas de estudo personalizadas usando LangChain, LangGraph, FAISS
+  e Gemini API.
+authors:
+  - family-names: "Araújo"
+    given-names: "Ailton"
+    affiliation: "Universidade Federal de Campina Grande"
+  - family-names: "Leite"
+    given-names: "Andrey"
+    affiliation: "Universidade Federal de Campina Grande"
+keywords:
+  - agentes
+  - RAG
+  - LangChain
+  - LangGraph
+  - carreira
+  - trilha de estudos
+  - FAISS
+  - MCP

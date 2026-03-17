@@ -1,0 +1,14 @@
+services:
+  career-guide:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ollama_data:/root/.ollama
+      - kaggle_cache:/root/.cache/kagglehub
+
+volumes:
+  ollama_data:
+  kaggle_cache:
