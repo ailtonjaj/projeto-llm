@@ -174,7 +174,7 @@ docker compose exec career-guide python eval/qa_eval.py
 
 ### Resultados (RAGAS)
 
-![Resultados RAGAS](docs/ragas.jpeg)
+![Resultados RAGAS](img/ragas.jpeg)
 
 ### Automação
 
