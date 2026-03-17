@@ -3,11 +3,31 @@ from mcp.server.stdio import stdio_server
 from mcp import types
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-import json, logging
+import json
+import logging
+import os
 
-ALLOWED_TOOLS = ["search_jobs", "get_job_requirements", "list_top_roles"]
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+LOG_PATH = os.path.join(BASE_DIR, "logs", "mcp_calls.log")
+FAISS_PATH = os.path.join(BASE_DIR, "data", "faiss_index")
 
-logging.basicConfig(filename="logs/mcp_calls.log", level=logging.INFO)
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+
+logger = logging.getLogger("mcp_jobs")
+logger.setLevel(logging.INFO)
+handler = logging.FileHandler(LOG_PATH, mode="a")
+handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+logger.addHandler(handler)
+
+ALLOWED_TOOLS = ["search_jobs", "get_job_requirements"]
+
+_embeddings = None
+
+def get_embeddings():
+    global _embeddings
+    if _embeddings is None:
+        _embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+    return _embeddings
 
 app = Server("mcp-jobs")
 
@@ -19,7 +39,10 @@ async def list_tools():
             description="Busca vagas por cargo/área no corpus do LinkedIn",
             inputSchema={
                 "type": "object",
-                "properties": {"query": {"type": "string"}, "k": {"type": "integer", "default": 5}},
+                "properties": {
+                    "query": {"type": "string"},
+                    "k": {"type": "integer", "default": 5}
+                },
                 "required": ["query"]
             }
         ),
@@ -36,21 +59,27 @@ async def list_tools():
 
 @app.call_tool()
 async def call_tool(name: str, arguments: dict):
-    # Allowlist check
     if name not in ALLOWED_TOOLS:
+        logger.warning(f"MCP BLOCKED: tool={name} não está na allowlist")
+        for h in logger.handlers:
+            h.flush()
         raise ValueError(f"Tool '{name}' não permitida.")
-    
-    logging.info(f"MCP CALL: tool={name} args={arguments}")
-    
-    embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-m3")
-    vs = FAISS.load_local("data/faiss_index", embeddings,
-                          allow_dangerous_deserialization=True)
-    
+
+    logger.info(f"MCP CALL: tool={name} args={arguments}")
+    for h in logger.handlers:
+        h.flush()
+
+    vs = FAISS.load_local(
+        FAISS_PATH,
+        get_embeddings(),
+        allow_dangerous_deserialization=True
+    )
+
     if name == "search_jobs":
         docs = vs.similarity_search(arguments["query"], k=arguments.get("k", 5))
         results = [{"content": d.page_content, "metadata": d.metadata} for d in docs]
         return [types.TextContent(type="text", text=json.dumps(results, ensure_ascii=False))]
-    
+
     elif name == "get_job_requirements":
         docs = vs.similarity_search(f"requisitos {arguments['role']}", k=8)
         return [types.TextContent(type="text", text="\n---\n".join(d.page_content for d in docs))]

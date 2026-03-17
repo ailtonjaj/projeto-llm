@@ -1,5 +1,6 @@
 from langgraph.graph import StateGraph, END
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List
+import asyncio
 
 class AgentState(TypedDict):
     query: str
@@ -22,7 +23,10 @@ def build_graph():
     from src.agents.answerer import answerer_node
     from src.agents.self_check import self_check_node
     from src.agents.automation.skill_gap_analyzer import skill_gap_node
-    from src.agents.automation.learning_path import learning_path_node  # corrigido
+    from src.agents.automation.learning_path import learning_path_node
+
+    def skill_gap_node_sync(state: dict) -> dict:
+        return asyncio.run(skill_gap_node(state))
 
     g = StateGraph(AgentState)
 
@@ -31,7 +35,7 @@ def build_graph():
     g.add_node("safety", safety_node)
     g.add_node("answerer", answerer_node)
     g.add_node("self_check", self_check_node)
-    g.add_node("skill_gap", skill_gap_node)
+    g.add_node("skill_gap", skill_gap_node_sync)
     g.add_node("learning_path", learning_path_node)
 
     g.set_entry_point("supervisor")
